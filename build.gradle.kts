@@ -1,60 +1,59 @@
-import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import org.gradle.configurationcache.extensions.capitalized
 
 plugins {
-    kotlin("jvm") version "1.7.21"
-    id("com.github.johnrengelman.shadow") version "7.0.0"
-}
-
-group = "com.jungma"
-version = "1.0-SNAPSHOT"
-
-repositories {
-    mavenCentral()
-    maven { url = uri("https://repo.papermc.io/repository/maven-public/") }
-}
-
-dependencies {
-    shadow("org.jetbrains.kotlin:kotlin-stdlib")
-    compileOnly("io.papermc.paper:paper-api:1.19.2-R0.1-SNAPSHOT")
+    idea
+    kotlin("jvm") version "1.8.10"
+    id("io.papermc.paperweight.userdev") version "1.4.1"
 }
 
 java {
-    toolchain.languageVersion.set(JavaLanguageVersion.of(17))
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(17))
+    }
 }
 
-fun TaskContainer.createJar(name: String, configuration: ShadowJar.() -> Unit) {
-    create<ShadowJar>(name) {
-        archiveBaseName.set("Core")
-        archiveVersion.set("")
-        from(sourceSets["main"].output)
-        configurations = listOf(project.configurations.shadow.get().apply { isCanBeResolved = true })
-        configuration()
-    }
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation(kotlin("stdlib"))
+    implementation(kotlin("reflect"))
+    paperDevBundle("1.19.2-R0.1-SNAPSHOT")
+}
+
+extra.apply {
+    set("pluginName", project.name.split("-").joinToString("") { it.capitalized() })
+    set("packageName", project.name.replace("-", ""))
+    set("kotlinVersion", "1.8.10")
+    set("paperVersion", "1.19")
 }
 
 tasks {
-    compileKotlin {
-        kotlinOptions.jvmTarget = "17"
-    }
-
-    compileTestKotlin {
-        kotlinOptions.jvmTarget = "17"
-    }
-
     processResources {
-        filesMatching("**/*.yml") {
+        filesMatching("*.yml") {
             expand(project.properties)
+            expand(project.extra.properties)
         }
     }
 
-    createJar("outJar") {
-        val path = File("/Users/mbj/Desktop/Minecraft/paper/bukkit/1.19.2/plugins")
+    create<Jar>("paperJar") {
+        from(sourceSets["main"].output)
+        archiveBaseName.set(project.extra.properties["pluginName"].toString())
+        archiveVersion.set("")
 
         doLast {
             copy {
                 from(archiveFile)
-                into(path)
+                val plugins = File(rootDir, ".server/plugins/")
+                into(plugins)
             }
         }
+    }
+}
+
+idea {
+    module {
+        excludeDirs.add(file(".server"))
     }
 }

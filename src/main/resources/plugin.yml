@@ -1,4 +1,7 @@
-name: Core
-version: 0.0.1
-api-version: 1.19
-main: com.jungma.nare.Core
+name: ${pluginName}
+version: ${version}
+main: ${group}.${packageName}.${pluginName}
+api-version: ${paperVersion}
+libraries:
+  - org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}
+  - org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}

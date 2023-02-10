@@ -23,6 +23,7 @@ dependencies {
 }
 
 extra.apply {
+    set("pluginClass", "Core")
     set("pluginName", project.name.split("-").joinToString("") { it.capitalized() })
     set("packageName", project.name.replace("-", ""))
     set("kotlinVersion", "1.8.10")
@@ -43,17 +44,21 @@ tasks {
         archiveVersion.set("")
 
         doLast {
+            val plugins = File(rootDir, "server/plugins/")
+            val update = File(plugins, "update")
+
             copy {
                 from(archiveFile)
-                val plugins = File(rootDir, ".server/plugins/")
-                into(plugins)
+                into(if (File(plugins, archiveFileName.get()).exists()) File(plugins, "update") else plugins)
             }
+
+            File(update, "RELOAD").delete()
         }
     }
 }
 
 idea {
     module {
-        excludeDirs.add(file(".server"))
+        excludeDirs.add(file("server"))
     }
 }

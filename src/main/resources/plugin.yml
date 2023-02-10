@@ -1,6 +1,6 @@
 name: ${pluginName}
 version: ${version}
-main: ${group}.${packageName}.${pluginName}
+main: ${group}.${packageName}.${pluginClass}
 api-version: ${paperVersion}
 libraries:
   - org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}
